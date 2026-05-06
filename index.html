@@ -823,7 +823,7 @@ let CFG = {
   examCode:        "1234",
   adminPass:       "מנהל123",
   sheetsUrl:       "https://script.google.com/macros/s/AKfycbx76CXYEuUNBl1eCprMkj1cuCJvoXDfcKJ32jIsjWtPrTzYhfBG5uNaqu5q55ehnhnNqg/exec",
-  sheetsQuestionsUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSIGhDiSjiYIrIA-mwKg_f4Mxg2fuGZJEdmBpszOyuYxeWNe-VkYus6GKOuAOktn9U5y_aPRpHVMpwb/pub?gid=0&single=true&output=csv",
+  sheetsQuestionsUrl: "",    // Google Sheets CSV פורסם — טעינת שאלות
   timer: 90,
   pts: 20,
   totalQ: 5,
@@ -1260,4 +1260,10 @@ function saveAdmin(){
   try{localStorage.setItem('quizCFG',JSON.stringify(CFG));}catch(e){}
   msg.style.color='var(--correct)'; msg.textContent='✅ נשמר בהצלחה!';
   document.getElementById('adm-cur').textContent=CFG.examCode;
-  // Reset live bank so ne
+  // Reset live bank so next exam fetches fresh
+  LIVE_BANK=null;
+  setTimeout(closeAdmin,1400);
+}
+</script>
+</body>
+</html>
