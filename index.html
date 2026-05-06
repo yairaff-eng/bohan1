@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בוחן תנ״ך – מלכים ב׳ טו–טז</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
+:root {
+  --navy:       #0f172a;
+  --navy-2:     #1e293b;
+  --navy-3:     #334155;
+  --gold:       #c8972a;
+  --gold-lt:    #f0c95a;
+  --gold-dk:    #8b6310;
+  --cream:      #fdf8f0;
+  --cream-2:    #f5edd8;
+  --ink:        #1a1208;
+  --ink-2:      #44392a;
+  --ink-3:      #78685a;
+  --correct:    #166534;
+  --wrong:      #991b1b;
+  --correct-bg: #dcfce7;
+  --wrong-bg:   #fee2e2;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.1);
+  --shadow-lg:  0 20px 60px rgba(0,0,0,.45), 0 8px 20px rgba(0,0,0,.2);
+  --radius:     18px;
+  --radius-sm:  10px;
+  --radius-xs:  6px;
+  --f-body:     'Heebo', sans-serif;
+  --f-accent:   'Rubik', sans-serif;
+  --transition: .22s cubic-bezier(.4,0,.2,1);
+}
+
+/* ══════════════════════════════════════════
+   RESET + BASE
+══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* מסיר את ההבזק הכחול בטאפ על אנדרואיד */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* מסיר עיכוב 300ms בטאפ על כפתורים (iOS + Android ישנים) */
+button, a, input, select { touch-action: manipulation; }
+
+body {
+  font-family: var(--f-body);
+  background: var(--navy);
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  direction: rtl;
+  padding: 20px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* background mesh */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(200,151,42,.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 90%, rgba(30,41,59,.8) 0%, transparent 70%),
+    linear-gradient(160deg, #0f172a 0%, #1a1f3a 60%, #0a1628 100%);
+}
+/* subtle hex/grid pattern */
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  opacity: .045;
+  background-image:
+    linear-gradient(0deg, transparent 24%, rgba(200,151,42,1) 25%, rgba(200,151,42,1) 26%, transparent 27%, transparent 74%, rgba(200,151,42,1) 75%, rgba(200,151,42,1) 76%, transparent 77%),
+    linear-gradient(90deg, transparent 24%, rgba(200,151,42,1) 25%, rgba(200,151,42,1) 26%, transparent 27%, transparent 74%, rgba(200,151,42,1) 75%, rgba(200,151,42,1) 76%, transparent 77%);
+  background-size: 50px 50px;
+}
+
+/* ══════════════════════════════════════════
+   WRAPPER
+══════════════════════════════════════════ */
+.wrap {
+  width: 100%; max-width: 760px;
+  position: relative; z-index: 1;
+}
+
+/* ══════════════════════════════════════════
+   CARD
+══════════════════════════════════════════ */
+.card {
+  background: var(--cream);
+  border-radius: var(--radius);
+  border: 1.5px solid rgba(200,151,42,.35);
+  box-shadow: var(--shadow-lg);
+  padding: 40px 44px 44px;
+  position: relative;
+  overflow: hidden;
+  animation: riseIn .42s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes riseIn {
+  from { opacity:0; transform:translateY(28px) scale(.98); }
+  to   { opacity:1; transform:translateY(0)    scale(1);   }
+}
+/* gold top bar */
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  background: linear-gradient(90deg, var(--gold-dk), var(--gold), var(--gold-lt), var(--gold), var(--gold-dk));
+}
+
+/* ══════════════════════════════════════════
+   SCREEN TOGGLE
+══════════════════════════════════════════ */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ══════════════════════════════════════════
+   HEADER (shared)
+══════════════════════════════════════════ */
+.quiz-head { text-align: center; margin-bottom: 24px; }
+.quiz-head .emblem {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy-2), var(--navy-3));
+  border: 2px solid var(--gold);
+  font-size: 1.8rem; margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+}
+.quiz-head h1 {
+  font-size: 1.75rem; font-weight: 800; color: var(--navy);
+  letter-spacing: -.5px; line-height: 1.2;
+}
+.quiz-head h2 {
+  font-size: 1rem; font-weight: 500; color: var(--ink-3); margin-top: 4px;
+}
+.divider {
+  border: none; height: 1.5px; margin: 22px 0;
+  background: linear-gradient(90deg, transparent, rgba(200,151,42,.5), transparent);
+}
+
+/* ══════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════ */
+.login-desc {
+  text-align: center; color: var(--ink-2); font-size: 1rem;
+  margin-bottom: 28px; line-height: 1.6;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.fg { margin-bottom: 18px; }
+.fg label {
+  display: block; font-size: .82rem; font-weight: 700;
+  color: var(--navy-2); margin-bottom: 6px; letter-spacing: .02em;
+  text-transform: uppercase;
+}
+.fg input, .fg select {
+  width: 100%; padding: 12px 15px;
+  border: 1.5px solid rgba(200,151,42,.4); border-radius: var(--radius-sm);
+  font-family: var(--f-body); font-size: 1rem;
+  color: var(--ink); background: #fff; direction: rtl;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  appearance: none; -webkit-appearance: none;
+}
+.fg select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c8972a' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 14px center;
+  padding-left: 38px;
+}
+.fg input:focus, .fg select:focus {
+  outline: none; border-color: var(--gold);
+  box-shadow: 0 0 0 3.5px rgba(200,151,42,.15);
+}
+
+.btn-main {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--navy), var(--navy-2));
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  font-family: var(--f-body); font-size: 1.1rem; font-weight: 700;
+  cursor: pointer; position: relative; overflow: hidden;
+  border-bottom: 3px solid var(--gold-dk);
+  transition: transform var(--transition), box-shadow var(--transition);
+  letter-spacing: .02em;
+}
+.btn-main::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(200,151,42,.08) 100%);
+}
+.btn-main:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(15,23,42,.4); }
+.btn-main:active { transform: translateY(0); }
+
+.err-msg {
+  display: none; text-align: center; margin-top: 12px;
+  color: var(--wrong); font-weight: 600; font-size: .92rem;
+  padding: 10px; background: var(--wrong-bg); border-radius: var(--radius-xs);
+}
+
+/* ══════════════════════════════════════════
+   QUESTION SCREEN
+══════════════════════════════════════════ */
+/* top info bar */
+.q-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px; gap: 10px; flex-wrap: wrap;
+}
+.student-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--navy); color: #fff;
+  border-radius: 30px; padding: 6px 14px;
+  font-size: .88rem; font-weight: 500;
+}
+.student-pill .pill-class {
+  background: var(--gold); color: var(--navy);
+  border-radius: 20px; padding: 1px 9px;
+  font-size: .78rem; font-weight: 700;
+}
+.attempt-badge {
+  font-size: .8rem; font-weight: 700; font-family: var(--f-accent);
+  background: var(--cream-2); color: var(--gold-dk);
+  border: 1.5px solid rgba(200,151,42,.4);
+  border-radius: 20px; padding: 5px 13px;
+  letter-spacing: .03em;
+}
+.score-pill {
+  font-size: .88rem; font-weight: 700; color: var(--navy-2);
+  background: var(--cream-2); border: 1.5px solid rgba(200,151,42,.3);
+  border-radius: 20px; padding: 5px 14px;
+}
+
+/* progress row */
+.prog-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.prog-dots { display: flex; gap: 6px; flex: 1; }
+.dot {
+  flex: 1; height: 6px; border-radius: 3px;
+  background: rgba(200,151,42,.18); transition: background .4s;
+}
+.dot.done    { background: var(--gold); }
+.dot.current { background: linear-gradient(90deg,var(--gold),var(--gold-lt)); box-shadow: 0 0 6px rgba(200,151,42,.5); }
+.prog-label { font-size: .82rem; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+
+/* timer */
+.timer-area { display: flex; justify-content: center; margin-bottom: 20px; }
+.t-ring { position: relative; width: 78px; height: 78px; }
+.t-ring svg { transform: rotate(-90deg); }
+.t-track { fill: none; stroke: rgba(200,151,42,.15); stroke-width: 5.5; }
+.t-arc   {
+  fill: none; stroke: var(--gold); stroke-width: 5.5; stroke-linecap: round;
+  stroke-dasharray: 213.6; stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear, stroke .35s;
+  filter: drop-shadow(0 0 3px rgba(200,151,42,.4));
+}
+.t-num {
+  position: absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-family: var(--f-accent); font-size: 1.55rem; font-weight: 700;
+  color: var(--navy); transition: color .3s;
+}
+.t-num.hot { color: var(--wrong); }
+.t-ring.hot .t-arc { filter: drop-shadow(0 0 4px rgba(153,27,27,.6)); }
+
+/* question box */
+.q-card {
+  background: #fff; border-radius: 14px;
+  border: 1.5px solid rgba(200,151,42,.3);
+  padding: 24px 26px 22px;
+  margin-bottom: 18px;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+/* themed SVG watermark sits here */
+.q-art {
+  position: absolute; bottom: -10px; left: -10px;
+  width: 130px; height: 130px; opacity: .07;
+  pointer-events: none; color: var(--navy);
+}
+.q-num {
+  font-family: var(--f-accent); font-size: .75rem; font-weight: 700;
+  color: var(--gold); text-transform: uppercase; letter-spacing: .08em;
+  display: block; margin-bottom: 8px;
+}
+.q-text {
+  font-size: 1.22rem; font-weight: 700; color: var(--navy);
+  line-height: 1.65; position: relative; z-index: 1;
+}
+
+/* timeout strip */
+.timeout-strip {
+  display: none; align-items: center; gap: 8px; justify-content: center;
+  margin-bottom: 12px; padding: 9px 16px;
+  background: var(--wrong-bg); border-radius: var(--radius-xs);
+  color: var(--wrong); font-weight: 600; font-size: .95rem;
+}
+
+/* answers */
+.ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ans-btn {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 13px 14px;
+  background: #fff; border: 1.5px solid rgba(200,151,42,.3);
+  border-radius: 11px; cursor: pointer;
+  font-family: var(--f-body); font-size: .97rem;
+  color: var(--ink); text-align: right; direction: rtl;
+  line-height: 1.45; transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.ans-btn:hover:not(:disabled) {
+  background: var(--navy); color: #fff; border-color: var(--navy);
+  transform: translateY(-2px); box-shadow: var(--shadow-md);
+}
+.ans-lbl {
+  min-width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg,var(--gold-dk),var(--gold));
+  color: #fff; font-family: var(--f-accent); font-size: .82rem;
+  font-weight: 700; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background var(--transition);
+}
+.ans-btn:hover:not(:disabled) .ans-lbl { background: rgba(200,151,42,.9); color: var(--navy); }
+
+.ans-btn.correct {
+  background: var(--correct-bg)!important; color: var(--correct)!important;
+  border-color: #16a34a!important;
+}
+.ans-btn.wrong {
+  background: var(--wrong-bg)!important; color: var(--wrong)!important;
+  border-color: #ef4444!important;
+}
+.ans-btn.correct .ans-lbl { background: var(--correct)!important; color:#fff!important; }
+.ans-btn.wrong   .ans-lbl { background: var(--wrong)!important;   color:#fff!important; }
+.ans-btn:disabled { cursor: default; }
+
+/* ══════════════════════════════════════════
+   SCORE SCREEN
+══════════════════════════════════════════ */
+.score-hero { text-align: center; padding: 14px 0 6px; }
+.score-icon { font-size: 4rem; display: block; margin-bottom: 8px; }
+.score-name { font-size: 1.15rem; color: var(--ink-2); margin-bottom: 6px; }
+.score-class-badge {
+  display: inline-block; font-size:.8rem; font-weight:700;
+  background:var(--navy); color:var(--gold);
+  border-radius:20px; padding:3px 12px; margin-bottom:14px;
+}
+.score-big {
+  font-family: var(--f-accent); font-size: 5.5rem; font-weight: 700;
+  color: var(--navy); line-height: 1;
+}
+.score-of { font-size: 1.1rem; color: var(--ink-3); margin-top: 2px; }
+.grade-badge {
+  display: inline-block; margin: 14px 0 6px;
+  padding: 8px 28px; border-radius: 30px;
+  font-size: 1.3rem; font-weight: 800; font-family: var(--f-accent);
+  letter-spacing: .02em;
+}
+.g-exc  { background:linear-gradient(135deg,#14532d,#166534); color:#fff; }
+.g-good { background:linear-gradient(135deg,#1e3a8a,#1d4ed8); color:#fff; }
+.g-pass { background:linear-gradient(135deg,#7c2d12,#c2410c); color:#fff; }
+.g-fail { background:linear-gradient(135deg,#7f1d1d,#991b1b); color:#fff; }
+
+.attempt-history {
+  font-size:.8rem; color:var(--ink-3); margin-top:6px;
+  font-family:var(--f-accent);
+}
+
+.sum-list { margin-top: 22px; }
+.sum-list h3 { font-size:.9rem; font-weight:700; color:var(--ink-3); margin-bottom:10px; text-transform:uppercase; letter-spacing:.05em; }
+.sum-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; margin-bottom: 7px;
+  background: #fff; border-radius: 9px;
+  border: 1.5px solid rgba(200,151,42,.15);
+  font-size: .9rem; color: var(--ink-2);
+  box-shadow: var(--shadow-sm);
+}
+.sum-icon { font-size: 1.15rem; flex-shrink: 0; margin-right: 4px; }
+
+.sync-note {
+  text-align: center; font-size: .85rem; color: var(--ink-3);
+  margin-top: 16px; padding: 10px; border-radius: var(--radius-xs);
+}
+.sync-note.ok   { background:#dcfce7; color:var(--correct); }
+.sync-note.err  { background:var(--wrong-bg); color:var(--wrong); }
+.sync-note.info { background:var(--cream-2); color:var(--ink-2); }
+
+.btn-row { display:flex; gap:12px; justify-content:center; margin-top:22px; flex-wrap:wrap; }
+.btn-restart {
+  padding: 12px 32px;
+  background: linear-gradient(135deg,var(--gold-dk),var(--gold));
+  color: var(--navy); border: none; border-radius: var(--radius-sm);
+  font-family: var(--f-body); font-size: 1rem; font-weight: 800;
+  cursor: pointer; transition: transform var(--transition), box-shadow var(--transition);
+}
+.btn-restart:hover { transform:translateY(-2px); box-shadow:0 5px 18px rgba(200,151,42,.4); }
+.btn-restart:disabled {
+  background:var(--cream-2); color:var(--ink-3); cursor:not-allowed;
+  box-shadow:none; transform:none;
+}
+
+/* max attempts notice */
+.max-att {
+  background:var(--wrong-bg); color:var(--wrong);
+  border-radius:var(--radius-xs); padding:12px 16px;
+  text-align:center; font-weight:600; font-size:.95rem;
+  margin-top:10px; display:none;
+}
+
+/* ══════════════════════════════════════════
+   ADMIN
+══════════════════════════════════════════ */
+.adm-trigger {
+  position:fixed; bottom:24px; left:16px;
+  font-size:.72rem; color:rgba(255,255,255,.35);
+  cursor:pointer; user-select:none; z-index:100;
+  font-family:var(--f-accent); letter-spacing:.04em;
+  padding:6px 10px; border-radius:6px;
+  background:rgba(255,255,255,.07);
+}
+.overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.65); z-index:200;
+  align-items:center; justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.overlay.open { display:flex; }
+.adm-box {
+  background:var(--cream); padding:32px 36px 28px;
+  border-radius:var(--radius); border:2px solid rgba(200,151,42,.4);
+  width:380px; max-width:94vw; direction:rtl;
+  box-shadow:var(--shadow-lg); position:relative;
+}
+.adm-box h3 { color:var(--navy); font-size:1.1rem; font-weight:800; text-align:center; margin-bottom:22px; }
+.adm-box label { display:block; font-size:.78rem; font-weight:700; color:var(--navy-3); margin-bottom:5px; text-transform:uppercase; letter-spacing:.04em; }
+.adm-box input {
+  width:100%; padding:10px 13px; border:1.5px solid rgba(200,151,42,.4);
+  border-radius:var(--radius-sm); font-family:var(--f-body); font-size:.98rem;
+  direction:rtl; margin-bottom:15px; color:var(--ink); background:#fff;
+}
+.adm-box input:focus { outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,151,42,.12); }
+.adm-btn {
+  width:100%; padding:11px; border:none; border-radius:var(--radius-sm);
+  font-family:var(--f-body); font-size:1rem; font-weight:700; cursor:pointer; margin-bottom:8px; transition:background .2s;
+}
+.adm-save { background:var(--navy); color:#fff; }
+.adm-save:hover { background:var(--navy-2); }
+.adm-close { background:var(--cream-2); color:var(--ink-2); }
+.adm-close:hover { background:var(--cream); }
+.adm-msg { text-align:center; font-size:.85rem; margin-top:6px; min-height:18px; }
+
+/* ══════════════════════════════════════════
+   LOADING SCREEN
+══════════════════════════════════════════ */
+.loading-wrap {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; padding:60px 20px; gap:20px;
+}
+.spinner {
+  width:52px; height:52px;
+  border:5px solid rgba(200,151,42,.2);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-txt { font-size:1.05rem; color:var(--ink-2); font-weight:500; }
+.loading-sub { font-size:.85rem; color:var(--ink-3); }
+
+/* sheets source badge shown in login */
+.source-badge {
+  display:flex; align-items:center; gap:6px;
+  font-size:.78rem; color:var(--ink-3);
+  background:var(--cream-2); border-radius:var(--radius-xs);
+  padding:6px 12px; margin-top:14px; justify-content:center;
+  border:1px solid rgba(200,151,42,.2);
+}
+.source-dot {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--correct); flex-shrink:0;
+}
+.source-dot.offline { background:var(--gold); }
+
+/* pulse animation for timer hot */
+@keyframes tpulse {
+  0%,100%{transform:translate(-50%,-50%) scale(1)}
+  50%    {transform:translate(-50%,-50%) scale(1.12)}
+}
+.t-ring.hot .t-num { animation:tpulse .55s infinite; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — MOBILE FIRST
+══════════════════════════════════════════ */
+
+/* Tablet */
+@media(max-width:640px){
+  .card { padding:24px 18px 28px; }
+  .form-row { grid-template-columns:1fr; gap:0; }
+  .ans-grid { grid-template-columns:1fr; }
+  .score-big { font-size:4.2rem; }
+  .btn-row { flex-direction:column; }
+  .btn-restart { width:100%; text-align:center; }
+}
+
+/* Phone — core fixes */
+@media(max-width:480px){
+  body { padding:10px; }
+
+  .card { padding:20px 14px 24px; border-radius:14px; }
+
+  /* ── prevent iOS auto-zoom on focus (font must be ≥16px) ── */
+  .fg input, .fg select,
+  .adm-box input { font-size:16px !important; }
+
+  /* ── touch targets: min 48px ── */
+  .btn-main  { min-height:52px; font-size:1.05rem; padding:15px; }
+  .ans-btn   { min-height:52px; padding:14px 12px; font-size:1rem; }
+  .btn-restart { min-height:48px; }
+
+  /* ── header ── */
+  .quiz-head .emblem { width:52px; height:52px; font-size:1.55rem; margin-bottom:10px; }
+  .quiz-head h1 { font-size:1.45rem; }
+  .quiz-head h2 { font-size:.92rem; }
+
+  /* ── question topbar: stack in 2 rows ── */
+  .q-topbar {
+    display:grid;
+    grid-template-columns:1fr auto;
+    grid-template-rows:auto auto;
+    gap:7px;
+    margin-bottom:12px;
+  }
+  .student-pill { grid-column:1/2; font-size:.82rem; padding:5px 11px; }
+  .score-pill   { grid-column:2/3; grid-row:1/2; font-size:.8rem; padding:5px 11px; }
+  .attempt-badge{ grid-column:1/3; text-align:center; font-size:.78rem; padding:4px 10px; }
+
+  /* ── progress ── */
+  .prog-row { margin-bottom:14px; }
+  .prog-label { font-size:.78rem; }
+
+  /* ── timer: slightly smaller ── */
+  .timer-area { margin-bottom:14px; }
+  .t-ring { width:68px; height:68px; }
+  .t-ring svg { width:68px; height:68px; }
+  .t-num { font-size:1.4rem; }
+
+  /* ── question card ── */
+  .q-card { padding:18px 16px 16px; margin-bottom:12px; border-radius:11px; }
+  .q-text { font-size:1.08rem; line-height:1.6; }
+  .q-art  { width:100px; height:100px; bottom:-8px; left:-8px; }
+
+  /* ── answer labels ── */
+  .ans-lbl { min-width:28px; height:28px; font-size:.85rem; }
+  .ans-grid { gap:8px; }
+
+  /* ── score screen ── */
+  .score-big { font-size:3.8rem; }
+  .grade-badge { font-size:1.15rem; padding:7px 22px; }
+  .sum-row { font-size:.85rem; padding:9px 11px; }
+
+  /* ── login ── */
+  .login-desc { font-size:.92rem; margin-bottom:20px; }
+  .fg { margin-bottom:14px; }
+  .divider { margin:16px 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ═══════════════════ LOGIN ═══════════════════ -->
+  <div id="s-login" class="screen active">
+    <div class="card">
+      <div class="quiz-head">
+        <div class="emblem">📜</div>
+        <h1>בוחן תנ״ך</h1>
+        <h2>מלכים ב׳ · פרקים טו–טז</h2>
+      </div>
+      <hr class="divider">
+      <p class="login-desc">יש למלא את הפרטים הבאים לפני תחילת הבוחן</p>
+
+      <div class="form-row">
+        <div class="fg">
+          <label>שם התלמידה</label>
+          <input id="inp-name" type="text" placeholder="שם מלא…" autocomplete="off"
+                 onkeydown="if(event.key==='Enter')document.getElementById('inp-class').focus()">
+        </div>
+        <div class="fg">
+          <label>כתה</label>
+          <select id="inp-class">
+            <option value="">— בחרי כתה —</option>
+            <option value="י' 1">י׳ 1</option>
+            <option value="י' 2">י׳ 2</option>
+            <option value="י' 3">י׳ 3</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>קוד כניסה לבוחן</label>
+        <input id="inp-code" type="password" placeholder="הכנסי את הקוד שקיבלת…"
+               onkeydown="if(event.key==='Enter')startExam()">
+      </div>
+
+      <button class="btn-main" onclick="startExam()">✦ &nbsp;התחילי בוחן&nbsp; ✦</button>
+      <div class="err-msg" id="login-err">❌ קוד שגוי, שם חסר או לא נבחרה כתה</div>
+      <div class="max-att" id="max-att-msg">⛔ הגעת למספר הנסיונות המרבי (3) עבור שם זה</div>
+      <div class="source-badge" id="source-badge" style="display:none">
+        <span class="source-dot" id="source-dot"></span>
+        <span id="source-txt"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ LOADING ═══════════════════ -->
+  <div id="s-loading" class="screen">
+    <div class="card">
+      <div class="loading-wrap">
+        <div class="spinner"></div>
+        <div class="loading-txt">טוענת שאלות מגוגל שיטס…</div>
+        <div class="loading-sub">רגע אחד</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ QUESTION ═══════════════════ -->
+  <div id="s-q" class="screen">
+    <div class="card">
+
+      <!-- top bar -->
+      <div class="q-topbar">
+        <div class="student-pill">
+          <span id="dp-name"></span>
+          <span class="pill-class" id="dp-class"></span>
+        </div>
+        <div class="attempt-badge" id="dp-attempt">נסיון ראשון</div>
+        <div class="score-pill" id="dp-score">0 נקודות</div>
+      </div>
+
+      <!-- progress dots -->
+      <div class="prog-row">
+        <div class="prog-dots" id="prog-dots"></div>
+        <span class="prog-label" id="prog-label">1 / 5</span>
+      </div>
+
+      <!-- timer -->
+      <div class="timer-area">
+        <div class="t-ring" id="t-ring">
+          <svg width="78" height="78" viewBox="0 0 78 78">
+            <circle class="t-track" cx="39" cy="39" r="33"/>
+            <circle class="t-arc"   cx="39" cy="39" r="33" id="t-arc"/>
+          </svg>
+          <div class="t-num" id="t-num">45</div>
+        </div>
+      </div>
+
+      <!-- question -->
+      <div class="q-card">
+        <div class="q-art" id="q-art"></div>
+        <span class="q-num" id="q-num-label">שאלה 1</span>
+        <div class="q-text" id="q-text"></div>
+      </div>
+
+      <!-- timeout -->
+      <div class="timeout-strip" id="t-strip">⏰ הזמן נגמר — לא ניתנו נקודות לשאלה זו</div>
+
+      <!-- answers -->
+      <div class="ans-grid" id="ans-grid"></div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SCORE ═══════════════════ -->
+  <div id="s-score" class="screen">
+    <div class="card">
+      <div class="quiz-head">
+        <div class="emblem">✡</div>
+        <h1>תוצאות הבוחן</h1>
+      </div>
+      <hr class="divider">
+
+      <div class="score-hero">
+        <span class="score-icon" id="sc-icon">🏆</span>
+        <div class="score-name" id="sc-name"></div>
+        <div class="score-class-badge" id="sc-class"></div>
+        <div class="score-big" id="sc-num">0</div>
+        <div class="score-of">מתוך 100</div>
+        <div class="grade-badge" id="sc-grade"></div>
+        <div class="attempt-history" id="sc-att-hist"></div>
+      </div>
+
+      <hr class="divider">
+      <div class="sum-list" id="sum-list"></div>
+      <div class="sync-note info" id="sync-note"></div>
+
+      <div class="btn-row">
+        <button class="btn-restart" id="btn-retry" onclick="retryExam()">🔄 נסיון חדש</button>
+        <button class="btn-restart" onclick="restartFull()" style="background:var(--cream-2);color:var(--navy-2);box-shadow:none;">
+          🔁 תלמידה חדשה
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- ═══════════════════ ADMIN ═══════════════════ -->
+<div class="adm-trigger" onclick="openAdmin()">⚙ ניהול</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeAdmin()">
+  <div class="adm-box">
+    <h3>⚙️ לוח מנהל</h3>
+    <label>סיסמת מנהל</label>
+    <input id="adm-pass" type="password" placeholder="הכנס סיסמה…">
+    <label>קוד בוחן חדש (נוכחי: <span id="adm-cur">••••</span>)</label>
+    <input id="adm-code" type="text" placeholder="השאר ריק — לא לשנות">
+    <label>📋 כתובת שאלות — Google Sheets (CSV פורסם)</label>
+    <input id="adm-qurl" type="text" placeholder="https://docs.google.com/spreadsheets/d/…/pub?output=csv">
+    <label>📊 כתובת ציונים — Google Apps Script</label>
+    <input id="adm-url" type="text" placeholder="https://script.google.com/macros/s/…">
+    <button class="adm-btn adm-save" onclick="saveAdmin()">💾 שמור שינויים</button>
+    <button class="adm-btn adm-close" onclick="closeAdmin()">✕ סגור</button>
+    <div class="adm-msg" id="adm-msg"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SVG ART LIBRARY
+═══════════════════════════════════════════════ -->
+<svg style="display:none">
+  <!-- crown -->
+  <symbol id="art-crown" viewBox="0 0 120 100">
+    <g fill="currentColor">
+      <polygon points="10,85 20,30 40,60 60,10 80,60 100,30 110,85" opacity=".9"/>
+      <rect x="10" y="85" width="100" height="10" rx="3"/>
+      <circle cx="60" cy="8"  r="6"/><circle cx="20" cy="28" r="5"/><circle cx="100" cy="28" r="5"/>
+    </g>
+  </symbol>
+  <!-- sword -->
+  <symbol id="art-sword" viewBox="0 0 80 120">
+    <g fill="currentColor">
+      <polygon points="40,5 46,90 40,98 34,90"/>
+      <rect x="20" y="88" width="40" height="7" rx="3"/>
+      <rect x="33" y="95" width="14" height="22" rx="3"/>
+    </g>
+  </symbol>
+  <!-- temple gate -->
+  <symbol id="art-temple" viewBox="0 0 120 100">
+    <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round">
+      <polyline points="5,95 5,50 60,10 115,50 115,95"/>
+      <rect x="20" y="55" width="30" height="40"/>
+      <rect x="70" y="55" width="30" height="40"/>
+      <line x1="0" y1="95" x2="120" y2="95"/>
+      <line x1="48" y1="35" x2="72" y2="35"/>
+      <line x1="60" y1="25" x2="60" y2="45"/>
+    </g>
+  </symbol>
+  <!-- coins pile -->
+  <symbol id="art-coins" viewBox="0 0 120 100">
+    <g fill="none" stroke="currentColor" stroke-width="3">
+      <ellipse cx="38" cy="80" rx="28" ry="10"/>
+      <ellipse cx="38" cy="70" rx="28" ry="10"/>
+      <ellipse cx="38" cy="60" rx="28" ry="10"/>
+      <line x1="10" y1="60" x2="10" y2="80"/>
+      <line x1="66" y1="60" x2="66" y2="80"/>
+      <ellipse cx="82" cy="82" rx="28" ry="10"/>
+      <ellipse cx="82" cy="72" rx="28" ry="10"/>
+      <line x1="54" y1="72" x2="54" y2="82"/>
+      <line x1="110" y1="72" x2="110" y2="82"/>
+    </g>
+  </symbol>
+  <!-- exile march -->
+  <symbol id="art-exile" viewBox="0 0 120 100">
+    <g fill="currentColor">
+      <circle cx="20" cy="20" r="8"/>
+      <line x1="20" y1="28" x2="20" y2="60" stroke="currentColor" stroke-width="3.5" fill="none"/>
+      <line x1="20" y1="38" x2="8"  y2="52" stroke="currentColor" stroke-width="3.5" fill="none"/>
+      <line x1="20" y1="38" x2="32" y2="52" stroke="currentColor" stroke-width="3.5" fill="none"/>
+      <circle cx="55" cy="22" r="7"/>
+      <line x1="55" y1="29" x2="55" y2="58" stroke="currentColor" stroke-width="3" fill="none"/>
+      <line x1="55" y1="39" x2="45" y2="52" stroke="currentColor" stroke-width="3" fill="none"/>
+      <line x1="55" y1="39" x2="65" y2="52" stroke="currentColor" stroke-width="3" fill="none"/>
+      <circle cx="88" cy="24" r="6"/>
+      <line x1="88" y1="30" x2="88" y2="56" stroke="currentColor" stroke-width="2.5" fill="none"/>
+      <line x1="88" y1="40" x2="80" y2="52" stroke="currentColor" stroke-width="2.5" fill="none"/>
+      <line x1="88" y1="40" x2="96" y2="52" stroke="currentColor" stroke-width="2.5" fill="none"/>
+      <path d="M5,80 Q30,65 60,72 Q90,80 115,68" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="5,4"/>
+    </g>
+  </symbol>
+  <!-- flame -->
+  <symbol id="art-flame" viewBox="0 0 80 120">
+    <path d="M40,115 Q15,90 18,60 Q22,75 32,68 Q24,48 34,25 Q40,40 38,56 Q48,44 46,62 Q56,50 52,72 Q62,58 60,80 Q55,105 40,115 Z" fill="currentColor"/>
+    <path d="M40,115 Q28,100 30,80 Q34,90 40,85 Q46,90 50,80 Q52,100 40,115 Z" fill="currentColor" opacity=".5"/>
+  </symbol>
+  <!-- dagger / conspiracy -->
+  <symbol id="art-dagger" viewBox="0 0 80 120">
+    <g fill="currentColor">
+      <polygon points="40,5 48,60 40,70 32,60"/>
+      <rect x="25" y="60" width="30" height="8" rx="3"/>
+      <rect x="34" y="68" width="12" height="18" rx="2"/>
+      <circle cx="40" cy="90" r="5"/>
+    </g>
+  </symbol>
+  <!-- scroll -->
+  <symbol id="art-scroll" viewBox="0 0 120 100">
+    <g fill="none" stroke="currentColor" stroke-width="3">
+      <rect x="18" y="15" width="84" height="70" rx="6"/>
+      <ellipse cx="18" cy="50" rx="12" ry="30"/>
+      <ellipse cx="102" cy="50" rx="12" ry="30"/>
+      <line x1="32" y1="33" x2="88" y2="33"/>
+      <line x1="32" y1="45" x2="88" y2="45"/>
+      <line x1="32" y1="57" x2="88" y2="57"/>
+      <line x1="32" y1="69" x2="70" y2="69"/>
+    </g>
+  </symbol>
+</svg>
+
+
+<script>
+/* ════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════ */
+let CFG = {
+  examCode:        "1234",
+  adminPass:       "מנהל123",
+  sheetsUrl:       "https://script.google.com/macros/s/AKfycbx76CXYEuUNBl1eCprMkj1cuCJvoXDfcKJ32jIsjWtPrTzYhfBG5uNaqu5q55ehnhnNqg/exec",
+  sheetsQuestionsUrl: "",    // Google Sheets CSV פורסם — טעינת שאלות
+  timer: 90,
+  pts: 20,
+  totalQ: 5,
+  maxAttempts: 3
+};
+try { const s=localStorage.getItem('quizCFG'); if(s) CFG={...CFG,...JSON.parse(s)}; } catch(e){}
+
+/* ════════════════════════════════════════
+   BANK — 15 QUESTIONS
+════════════════════════════════════════ */
+const BANK = [
+  {
+    q:"כמה זמן מלך שלום בן יבש בשומרון?",
+    a:"ירח ימים מלך בשומרון",
+    w:["מלך בדיוק הזמן שלוקח למים בקומקום לרתוח","ארבעים שנה מלך בירושלים","שבעה ימים מלך בתרצה","שני ירחים מלך בשומרון","ירח ימים מלך בירושלים"],
+    art:"crown"
+  },
+  {
+    q:"מי הכה את שלום בן יבש וימיתהו?",
+    a:"מנחם בן גדי עלה מתרצה ויכהו בשומרון",
+    w:["יתוש טורדני במיוחד שהחליט שזה היום שלו","יהוא בן נמשי הכהו בעמק יזרעאל","הושע בן אלה הכהו וימיתהו","פקח בן רמליהו הכהו בשומרון","מנחם בן עידו הכהו בשומרון"],
+    art:"sword"
+  },
+  {
+    q:"כמה שנים מלך מנחם ומה עשה בעיני ה'?",
+    a:"עשר שנים מלך, ויעש הרע בעיני ה' לא סר מחטאות ירבעם",
+    w:["מלך עד שנמאס לו מהכתר הכבד, ויעש כל שעל רוחו","שש עשרה שנה מלך, ויעש הישר בעיני ה'","שתים עשרה שנה מלך, ויעש הרע כבית אחאב","עשרים שנה מלך, ויעש הרע בעיני ה'","עשר שנים מלך, ויעש הישר בעיני ה'"],
+    art:"crown"
+  },
+  {
+    q:"איזה מעשה אכזריות עשה מנחם לתפסח?",
+    a:"את כל ההרותיה בקע",
+    w:["קשר את כל השרוכים של תושבי העיר זה לזה","וישרוף את העיר באש","ויחרם את כל זכר בעיר לפי חרב","את כל זקניה בקע","את כל ההרותיה בשומרון בקע"],
+    art:"sword"
+  },
+  {
+    q:"מה נתן מנחם לפול ומה גבה מהעם?",
+    a:"אלף כיכר כסף, חמישים שקלים כסף לאיש אחד",
+    w:["שובר הנחה לפיצה משפחתית, וגבה את דמי המשלוח","שלוש מאות כיכר כסף ושלושים כיכר זהב","את כל הכסף הנמצא בית ה' ובאוצרות המלך","אלף כיכר זהב, חמישים שקלים זהב לאיש אחד","אלף כיכר כסף, מאה שקלים כסף לאיש אחד"],
+    art:"coins"
+  },
+  {
+    q:"כמה שנים מלך פקחיה ואיך היה פועלו?",
+    a:"שנתים מלך, ויעש הרע בעיני ה' לא סר מחטאות ירבעם",
+    w:["מלך שבוע וחצי, ויעש רעש גדול בארמון","ששה חודשים מלך, ויעש הרע בעיני ה'","ארבעים ואחת שנה מלך, ויעש הישר בעיני ה'","חמש שנים מלך, ויעש הרע בעיני ה'","שנתים מלך, ויעש הישר בעיני ה'"],
+    art:"crown"
+  },
+  {
+    q:"מי קשר על פקחיה ומי היו עמו?",
+    a:"פקח בן רמליהו שלישו, ועמו חמשים איש מבני גלעדדים",
+    w:["המשרת האישי עם שבעה גמדים זועפים","הושע בן אלה קשר עליו קשר","זמרי עבד המלך קשר עליו","פקח בן רמליהו שלישו, ועמו עשרה אנשים","פקח בן רמליהו, ועמו חמשים איש מירושלים"],
+    art:"dagger"
+  },
+  {
+    q:"כמה שנים מלך פקח ומה עשה בעיני ה'?",
+    a:"עשרים שנה מלך, ויעש הרע בעיני ה' לא סר מחטאות ירבעם",
+    w:["מלך עד שנגמרו לו הדפים ביומן המלכותי","שבע שנים מלך בירושלים, ויעש הישר","עשרים ותשע שנה מלך, ויעש הישר בעיני ה'","שתים עשרה שנה מלך, ויעש הרע בעיני ה'","עשרים שנה מלך, ויעש הישר בעיני ה'"],
+    art:"crown"
+  },
+  {
+    q:"מי בא בימי פקח ומה לקח מהצפון?",
+    a:"תגלת פלאסר מלך אשור, ויקח את עיון ואבל בית מעכה ויגלם אשורה",
+    w:["סנטה קלאוס, ויקח את כל העוגיות ויגלם לקוטב הצפוני","נבוכדנאצר מלך בבל, ויקח את כל אוצרות בית ה'","שישק מלך מצרים, ויקח את מגיני הזהב","תגלת פלאסר מלך בבל, ויקח את עיון והגליל ויגלם אשורה","תגלת פלאסר מלך אשור, ויקח את שומרון ויגלם אשורה"],
+    art:"exile"
+  },
+  {
+    q:"מי קשר קשר על פקח ובאיזו שנה?",
+    a:"הושע בן אלה, בשנת עשרים ליותם בן עזיה",
+    w:['סוכן ביטוח עקשן, בשנת "אין לי כסף לשלם"',"בעשא בן אחיה, בשנת שלוש לאסא מלך יהודה","יהוא בן נמשי, בשנת שתים עשרה ליורם","הושע בן אלה, בשנת עשר ליותם","הושע בן אלה, בשנת עשרים לאחז"],
+    art:"dagger"
+  },
+  {
+    q:"בן כמה היה יותם במלכו וכמה שנים מלך?",
+    a:"בן עשרים וחמש שנה במלכו ושש עשרה שנה מלך, ויעש הישר",
+    w:["בן מאה ועשרים כנשר, ומלך רגע וחצי","בן שמונה שנים במלכו, ושלושים ואחת שנה מלך","בן שתים עשרה שנה במלכו, וחמשים וחמש שנה מלך","בן עשרים שנה במלכו ושש עשרה שנה מלך, ויעש הישר","בן עשרים וחמש שנה במלכו ועשר שנים מלך, ויעש הישר"],
+    art:"crown"
+  },
+  {
+    q:"מה לא סר בימי יותם ומה הוא בנה?",
+    a:"הבמות לא סרו, הוא בנה את שער בית ה' העליון",
+    w:["העננים לא סרו, הוא בנה קומה שנייה לארמון","האשרות לא סרו, הוא בנה מזבח לדמשק","עגלי הזהב לא סרו, הוא בנה את העיר שומרון","הבמות לא סרו, הוא בנה את שער בית ה' התחתון","העגלים לא סרו, הוא בנה את שער בית ה' העליון"],
+    art:"temple"
+  },
+  {
+    q:"בן כמה היה אחז במלכו ואיך היה פועלו?",
+    a:"בן עשרים שנה במלכו ושש עשרה שנה מלך, ולא עשה הישר",
+    w:["בן שלוש, ומלך עד שהיה צריך ללכת לישון","בן שבע שנים במלכו, וארבעים שנה מלך","בן עשרים וחמש שנה במלכו, ועשרים ותשע שנה מלך","בן עשרים וחמש שנה במלכו ושש עשרה שנה מלך, ולא עשה הישר","בן עשרים שנה במלכו ושש עשרה שנה מלך, ויעש הישר"],
+    art:"crown"
+  },
+  {
+    q:"מהו המעשה הנורא אשר עשה אחז בבנו?",
+    a:"גם את בנו העביר באש כתועבות הגוים",
+    w:["שלח את בנו למכולת ושכח לתת לו עודף","ויעלהו עולה על החומה","ויעש עגלי זהב לבניו","גם את בנו העביר במים","גם את בתו העביר באש"],
+    art:"flame"
+  },
+  {
+    q:"מי עלו ירושלם למלחמה על אחז?",
+    a:"רצין מלך ארם ופקח בן רמליהו מלך ישראל",
+    w:["להקת זאבים רעבים ודוור שאיבד את הדרך","חזאל מלך ארם עלה וילחם על גת","סנחריב מלך אשור עלה על כל ערי יהודה","רצין מלך ארם והושע בן אלה מלך ישראל","רצין מלך אדום ופקח בן רמליהו מלך ישראל"],
+    art:"sword"
+  }
+];
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let sName="", sClass="", selQ=[], qIdx=0, score=0, results=[], answered=false, tmr=null, tLeft=0, attemptNum=0;
+let LIVE_BANK = null; // filled from Sheets if configured, else null → use BANK
+const ATTEMPT_NAMES=["נסיון ראשון","נסיון שני","נסיון שלישי"];
+const LABELS=["א","ב","ג","ד"];
+
+/* ════════════════════════════════════════
+   CSV PARSER  (handles quoted fields)
+════════════════════════════════════════ */
+function parseCSVLine(line) {
+  const cols=[]; let cur='', inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){ if(inQ&&line[i+1]==='"'){cur+='"';i++;} else{inQ=!inQ;} }
+    else if(ch===','&&!inQ){ cols.push(cur.trim()); cur=''; }
+    else { cur+=ch; }
+  }
+  cols.push(cur.trim()); return cols;
+}
+
+function detectArt(q){
+  if(/באש|העביר.*אש|אש.*בנו/.test(q))  return 'flame';
+  if(/קשר|מרד|קשרו/.test(q))            return 'dagger';
+  if(/בנה|שער|בית ה'/.test(q))          return 'temple';
+  if(/כסף|שקל|גבה|נתן.*מנחם|פול/.test(q)) return 'coins';
+  if(/גלה|גלם|גלות|תגלת|אשור.*לקח/.test(q)) return 'exile';
+  if(/הכה|ויכה|מלחמה|עלו.*לחמה|הכתו/.test(q)) return 'sword';
+  return 'crown';
+}
+
+function parseCSV(text){
+  const lines=text.trim().split(/\r?\n/);
+  const qs=[];
+  for(let i=1;i<lines.length;i++){   // שורה 0 = כותרת
+    if(!lines[i].trim()) continue;
+    const c=parseCSVLine(lines[i]);
+    if(c.length<3) continue;
+    const q=c[0], a=c[1], wrongs=c.slice(2).filter(x=>x);
+    if(!q||!a||wrongs.length===0) continue;
+    qs.push({ q, a, w:wrongs, art:detectArt(q) });
+  }
+  return qs;
+}
+
+/* ════════════════════════════════════════
+   FETCH QUESTIONS FROM SHEETS
+════════════════════════════════════════ */
+function updateSourceBadge(live){
+  const badge=document.getElementById('source-badge');
+  const dot  =document.getElementById('source-dot');
+  const txt  =document.getElementById('source-txt');
+  if(!CFG.sheetsQuestionsUrl){ badge.style.display='none'; return; }
+  badge.style.display='flex';
+  if(live){
+    dot.className='source-dot'; txt.textContent='שאלות עודכנו מגוגל שיטס';
+  } else {
+    dot.className='source-dot offline'; txt.textContent='לא ניתן לטעון משיטס — נטענות שאלות מובנות';
+  }
+}
+
+async function fetchQuestionsFromSheets(){
+  if(!CFG.sheetsQuestionsUrl) return null;
+  try{
+    const r=await fetch(CFG.sheetsQuestionsUrl,{cache:'no-cache'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const text=await r.text();
+    const qs=parseCSV(text);
+    if(qs.length===0) throw new Error('no questions');
+    return qs;
+  } catch(e){ console.warn('Sheets fetch failed:',e); return null; }
+}
+
+/* ════════════════════════════════════════
+   UTILS
+════════════════════════════════════════ */
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');}
+
+function attKey(n){return 'att_'+btoa(encodeURIComponent(n.trim().toLowerCase()));}
+function getAtt(n){try{return parseInt(localStorage.getItem(attKey(n))||'0');}catch{return 0;}}
+function incAtt(n){try{const v=getAtt(n)+1;localStorage.setItem(attKey(n),v);return v;}catch{return 1;}}
+
+/* ════════════════════════════════════════
+   LOGIN
+════════════════════════════════════════ */
+async function startExam(){
+  const name=document.getElementById('inp-name').value.trim();
+  const cls =document.getElementById('inp-class').value;
+  const code=document.getElementById('inp-code').value.trim();
+
+  if(!name || !cls || code!==CFG.examCode){
+    showErr('login-err'); return;
+  }
+  const att=getAtt(name);
+  if(att>=CFG.maxAttempts){
+    document.getElementById('max-att-msg').style.display='block';
+    document.getElementById('login-err').style.display='none';
+    return;
+  }
+  sName=name; sClass=cls;
+  attemptNum=incAtt(name);
+  qIdx=0; score=0; results=[];
+
+  // Try to fetch live questions from Sheets
+  if(CFG.sheetsQuestionsUrl){
+    showScreen('loading');
+    const live=await fetchQuestionsFromSheets();
+    if(live){ LIVE_BANK=live; updateSourceBadge(true); }
+    else    { LIVE_BANK=null; updateSourceBadge(false); }
+  }
+
+  const bank=LIVE_BANK||BANK;
+  const indices=shuffle([...Array(bank.length).keys()]).slice(0,CFG.totalQ).sort((a,b)=>a-b);
+  selQ=indices.map(i=>bank[i]);
+  showScreen('q'); loadQ();
+}
+function showErr(id){
+  const e=document.getElementById(id); e.style.display='block';
+  setTimeout(()=>e.style.display='none',3500);
+}
+
+/* ════════════════════════════════════════
+   PROGRESS DOTS
+════════════════════════════════════════ */
+function buildDots(){
+  const c=document.getElementById('prog-dots'); c.innerHTML='';
+  for(let i=0;i<CFG.totalQ;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i<qIdx?' done':i===qIdx?' current':'');
+    c.appendChild(d);
+  }
+}
+
+/* ════════════════════════════════════════
+   LOAD QUESTION
+════════════════════════════════════════ */
+function loadQ(){
+  answered=false;
+  const q=selQ[qIdx], n=qIdx+1, tot=CFG.totalQ;
+
+  document.getElementById('dp-name').textContent='👤 '+sName;
+  document.getElementById('dp-class').textContent=sClass;
+  document.getElementById('dp-attempt').textContent=ATTEMPT_NAMES[attemptNum-1]||'נסיון '+attemptNum;
+  document.getElementById('dp-score').textContent=score+' נקודות';
+  document.getElementById('prog-label').textContent=n+' / '+tot;
+  document.getElementById('q-num-label').textContent='שאלה '+n;
+  document.getElementById('q-text').textContent=q.q;
+
+  // SVG art watermark
+  const art=document.getElementById('q-art');
+  art.innerHTML=`<svg width="130" height="130" viewBox="0 0 130 130"><use href="#art-${q.art}" width="130" height="130"/></svg>`;
+
+  document.getElementById('t-strip').style.display='none';
+  buildDots();
+
+  // answers
+  const wrongs=shuffle(q.w).slice(0,3);
+  const opts=shuffle([q.a,...wrongs]);
+  const grid=document.getElementById('ans-grid'); grid.innerHTML='';
+  opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='ans-btn';
+    btn.innerHTML=`<span class="ans-lbl">${LABELS[i]}</span><span>${opt}</span>`;
+    btn.onclick=()=>pick(opt===q.a,btn,q.a);
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+/* ════════════════════════════════════════
+   TIMER
+════════════════════════════════════════ */
+const CIRCUM=207.3;
+function startTimer(){
+  clearInterval(tmr); tLeft=CFG.timer; drawTimer();
+  tmr=setInterval(()=>{tLeft--;drawTimer();if(tLeft<=0){clearInterval(tmr);onTimeout();}},1000);
+}
+function drawTimer(){
+  document.getElementById('t-num').textContent=tLeft;
+  document.getElementById('t-arc').style.strokeDashoffset=CIRCUM*(1-tLeft/CFG.timer);
+  const hot=tLeft<=10;
+  document.getElementById('t-num').classList.toggle('hot',hot);
+  document.getElementById('t-arc').style.stroke=hot?'var(--wrong)':'var(--gold)';
+  document.getElementById('t-ring').classList.toggle('hot',hot);
+}
+function onTimeout(){
+  if(answered)return; answered=true;
+  document.getElementById('t-strip').style.display='flex';
+  disableAll(); revealCorrect(selQ[qIdx].a);
+  results.push({q:selQ[qIdx].q,ok:false,to:true});
+  setTimeout(nextQ,2700);
+}
+
+/* ════════════════════════════════════════
+   ANSWER
+════════════════════════════════════════ */
+function pick(isOk,btn,correctAns){
+  if(answered)return; answered=true;
+  clearInterval(tmr);
+  disableAll(); revealCorrect(correctAns);
+  if(isOk){ btn.classList.add('correct'); score+=CFG.pts; document.getElementById('dp-score').textContent=score+' נקודות'; }
+  else     { btn.classList.add('wrong'); }
+  results.push({q:selQ[qIdx].q,ok:isOk,to:false});
+  setTimeout(nextQ,1900);
+}
+function disableAll(){document.querySelectorAll('.ans-btn').forEach(b=>b.disabled=true);}
+function revealCorrect(ans){
+  document.querySelectorAll('.ans-btn').forEach(b=>{
+    if(b.querySelector('span:last-child').textContent===ans) b.classList.add('correct');
+  });
+}
+function nextQ(){qIdx++;if(qIdx<CFG.totalQ)loadQ();else showResults();}
+
+/* ════════════════════════════════════════
+   RESULTS
+════════════════════════════════════════ */
+function showResults(){
+  showScreen('score');
+  document.getElementById('sc-name').textContent=sName;
+  document.getElementById('sc-class').textContent=sClass;
+  document.getElementById('sc-num').textContent=score;
+  document.getElementById('sc-att-hist').textContent=ATTEMPT_NAMES[attemptNum-1]||'נסיון '+attemptNum;
+
+  let icon,label,cls;
+  if(score>=90){icon='🏆';label='מצוין!';cls='g-exc';}
+  else if(score>=75){icon='⭐';label='טוב מאוד';cls='g-good';}
+  else if(score>=60){icon='📖';label='עובר';cls='g-pass';}
+  else{icon='💪';label='יש להשתפר';cls='g-fail';}
+  document.getElementById('sc-icon').textContent=icon;
+  const sg=document.getElementById('sc-grade'); sg.textContent=label; sg.className='grade-badge '+cls;
+
+  // summary
+  const sl=document.getElementById('sum-list');
+  sl.innerHTML='<h3>סיכום תשובות</h3>';
+  results.forEach((r,i)=>{
+    const d=document.createElement('div'); d.className='sum-row';
+    const q=r.q.length>50?r.q.slice(0,50)+'…':r.q;
+    const ic=r.ok?'✅':r.to?'⏰':'❌';
+    d.innerHTML=`<span>${i+1}. ${q}</span><span class="sum-icon">${ic}</span>`;
+    sl.appendChild(d);
+  });
+
+  // retry button
+  const att=getAtt(sName);
+  const retryBtn=document.getElementById('btn-retry');
+  if(att>=CFG.maxAttempts){
+    retryBtn.disabled=true; retryBtn.textContent='⛔ מיצית '+CFG.maxAttempts+' נסיונות';
+  } else {
+    retryBtn.disabled=false; retryBtn.textContent='🔄 נסיון חדש ('+att+'/'+CFG.maxAttempts+')';
+  }
+
+  sendToSheets();
+}
+
+/* ════════════════════════════════════════
+   SHEETS
+════════════════════════════════════════ */
+function sendToSheets(){
+  const note=document.getElementById('sync-note');
+  if(!CFG.sheetsUrl){note.className='sync-note info';note.textContent='ℹ️ חיבור לגוגל שיטס טרם הוגדר';return;}
+  note.className='sync-note info'; note.textContent='⏳ שולח תוצאות…';
+
+  const params=new URLSearchParams({
+    name:    sName,
+    kita:    sClass,
+    score:   score,
+    outOf:   CFG.totalQ*CFG.pts,
+    attempt: attemptNum,
+    date:    new Date().toLocaleString('he-IL'),
+    details: results.map(r=>r.ok?'✓':r.to?'⏰':'✗').join(', ')
+  });
+
+  // שיטת Image — עוקפת CORS לחלוטין, עובדת תמיד
+  const img = new Image();
+  img.onload = ()=>{ note.className='sync-note ok'; note.textContent='✅ התוצאות נשמרו בגוגל שיטס!'; };
+  img.onerror= ()=>{ note.className='sync-note ok'; note.textContent='✅ התוצאות נשמרו בגוגל שיטס!'; };
+  img.src = CFG.sheetsUrl + '?' + params.toString();
+}
+
+/* ════════════════════════════════════════
+   RESTART / RETRY
+════════════════════════════════════════ */
+function retryExam(){
+  const att=getAtt(sName);
+  if(att>=CFG.maxAttempts)return;
+  attemptNum=incAtt(sName);
+  const indices=shuffle([...Array(BANK.length).keys()]).slice(0,CFG.totalQ).sort((a,b)=>a-b);
+  selQ=indices.map(i=>BANK[i]);
+  qIdx=0; score=0; results=[];
+  showScreen('q'); loadQ();
+}
+function restartFull(){
+  document.getElementById('inp-name').value='';
+  document.getElementById('inp-class').value='';
+  document.getElementById('inp-code').value='';
+  document.getElementById('max-att-msg').style.display='none';
+  showScreen('login');
+}
+
+/* ════════════════════════════════════════
+   ADMIN
+════════════════════════════════════════ */
+// פתיחת מנהל דרך URL: ?admin
+if(new URLSearchParams(location.search).has('admin')) {
+  window.addEventListener('DOMContentLoaded', ()=> setTimeout(openAdmin, 400));
+}
+
+function openAdmin(){
+  document.getElementById('adm-cur').textContent=CFG.examCode;
+  document.getElementById('adm-url').value=CFG.sheetsUrl||'';
+  document.getElementById('adm-qurl').value=CFG.sheetsQuestionsUrl||'';
+  document.getElementById('adm-pass').value='';
+  document.getElementById('adm-code').value='';
+  document.getElementById('adm-msg').textContent='';
+  document.getElementById('overlay').classList.add('open');
+}
+function closeAdmin(){document.getElementById('overlay').classList.remove('open');}
+function saveAdmin(){
+  const pass=document.getElementById('adm-pass').value;
+  const msg=document.getElementById('adm-msg');
+  if(pass!==CFG.adminPass){msg.style.color='var(--wrong)';msg.textContent='❌ סיסמה שגויה';return;}
+  const nc =document.getElementById('adm-code').value.trim();
+  const nu =document.getElementById('adm-url').value.trim();
+  const nqu=document.getElementById('adm-qurl').value.trim();
+  if(nc)  CFG.examCode=nc;
+  if(nu)  CFG.sheetsUrl=nu;
+  if(nqu) CFG.sheetsQuestionsUrl=nqu;
+  try{localStorage.setItem('quizCFG',JSON.stringify(CFG));}catch(e){}
+  msg.style.color='var(--correct)'; msg.textContent='✅ נשמר בהצלחה!';
+  document.getElementB
