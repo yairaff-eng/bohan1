@@ -1259,4 +1259,11 @@ function saveAdmin(){
   if(nqu) CFG.sheetsQuestionsUrl=nqu;
   try{localStorage.setItem('quizCFG',JSON.stringify(CFG));}catch(e){}
   msg.style.color='var(--correct)'; msg.textContent='✅ נשמר בהצלחה!';
-  document.getElementB
+  document.getElementById('adm-cur').textContent=CFG.examCode;
+  // Reset live bank so next exam fetches fresh
+  LIVE_BANK=null;
+  setTimeout(closeAdmin,1400);
+}
+</script>
+</body>
+</html>
